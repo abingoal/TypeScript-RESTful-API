@@ -37,9 +37,9 @@ $ touch tsconfig.json
 
 配置说明:
 
-1、 `compilerOptions` 编译选项表示把TypeScript代码编译为es6标准，并且使用commonjs的模块方式
-2、 `include` 表示将要编译的ts代码目录
-3、 `exclude` 排除不需要编译的目录
+  1、 `compilerOptions` 编译选项表示把TypeScript代码编译为es6标准，并且使用commonjs的模块方式。
+  2、 `include` 表示将要编译的ts代码目录
+  3、 `exclude` 排除不需要编译的目录
 
 
 创建一个`src`目录
@@ -97,9 +97,9 @@ $ npm install gulp gulp-typescript --save-dev
 
 然后在项目根目录添加`gulpfile.js`文件，在这里我们会做以下几项操作:
 
-1、 读取`tsconfig.json` 然后传递给`gulp-typescript`进行配置。
-2、 使用`gulp-typescript`编译项目并配置编译后的目录`dist`。
-3、 监听`.ts`文件的变动并实时编译。
+  1、 读取`tsconfig.json` 然后传递给`gulp-typescript`进行配置。
+  2、 使用`gulp-typescript`编译项目并配置编译后的目录`dist`。
+  3、 监听`.ts`文件的变动并实时编译。
 
 `gulpfile.js` 的代码如下:
 
@@ -140,3 +140,6 @@ gulp.task('assets', () => {
 gulp.task('default', ['watch', 'assets']);
 ```
 
+现在测试，删除`dist/test.js`，然后在项目根目录运行`gulp`，此时可以看到编译器完美按照我们的配置进行了。
+
+## 配置Express
