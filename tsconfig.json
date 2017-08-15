@@ -1,0 +1,16 @@
+{
+  "compileOnSave": true,  // 仅在Visual Studio中生效
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "declaration": false, // 生成相应的.d.ts文件
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "dist"
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
