@@ -3,18 +3,17 @@ import * as sequelize from 'sequelize';
 
 const debugging = debug('gameapi:sql');
 
-class Configs {
-    public dbAccount: IDBAccount;            // 数据库配置
-    public dbOption: sequelize.Options;     // 查询配置
-    public dbDebug: boolean | Function;     // 数据库是否调试模式
-
-    constructor() {
-        // 是否调试
-        this.dbDebug = (con) => {
-            debugging(con);
-        };
-        // 查询配置
-        this.dbOption = {
+const configs: any = {
+    isDebug: (con) => {
+        debugging(con);
+    },
+    dataBase: {
+        account: {
+            database: 'database',
+            userid: 'userid',
+            password: 'password'
+        },
+        option: {
             dialect: 'mysql',
             host: 'host',
             dialectOptions: {
@@ -28,18 +27,16 @@ class Configs {
                 min: 0,
                 idle: 150
             }
-        };
-        // 数据库账号
-        this.dbAccount = {
-            database: 'database',
-            userid: 'userid',
-            password: 'password'
-        };
+        }
+    },
+    wechat: {
+        appid: '',
+        secretKey: ''
+    },
+    qq: {
+        appid: '',
+        secretKey: ''
     }
-}
-interface IDBAccount {
-    database: string;
-    userid: string;
-    password: string;
-}
-export default new Configs();
+};
+
+export default configs;

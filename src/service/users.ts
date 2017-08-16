@@ -9,7 +9,8 @@ class Users {
      * @param userid 用户id
      */
     public async userInfo(userid: number) {
-        return await db.execProc('call p_API_UserInfo(:userid)', { userid });
+        const type = 1;
+        return await db.execProc('call p_API_UserInfo(:userid,:type)', { userid, type });
     }
 }
 export default new Users();

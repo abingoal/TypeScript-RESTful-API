@@ -1,5 +1,7 @@
-export default class MsgCode {
-    public exception: number = -1;     // 异常
-    public failure: number = 0;        // 失败
-    public success: number = 1;        // 成功
+enum MsgCode {
+    exception = -1,         // 异常
+    failure = 0,            // 失败
+    success = 1,            // 成功
+    paramsError = 101       // 参数错误
 }
+export default MsgCode;

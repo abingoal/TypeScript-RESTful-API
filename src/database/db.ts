@@ -11,10 +11,10 @@ class DataBase {
      */
     constructor() {
         this.db = new sequelize(
-            configs.dbAccount.database,
-            configs.dbAccount.userid,
-            configs.dbAccount.password,
-            configs.dbOption
+            configs.dataBase.account.database,
+            configs.dataBase.account.userid,
+            configs.dataBase.account.password,
+            configs.dataBase.option
         );
         this.init();
     }
@@ -30,7 +30,7 @@ class DataBase {
                 return;
             }
             this.db.query(procName, {
-                logging: configs.dbDebug,
+                logging: configs.isDebug,
                 raw: true,
                 replacements: params
             }).then((data) => {

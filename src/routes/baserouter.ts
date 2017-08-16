@@ -1,23 +1,19 @@
-import * as express from 'express';
+import { NextFunction, Request, Response, Router } from 'express';
+import app from '../app';
 import userRouter from '../routes/userrouter';
 
 class BaseRouter {
-  private app: express.Application;
-  private router: express.Router;
-
-  constructor(app: express.Application, router: express.Router) {
-    this.app = app;
-    this.router = router;
+  public router: Router = Router();
+  constructor() {
+    this.init();
   }
-
-  public init(): void {
-    const router = express.Router();
-    router.get('/', (req, res, next) => {
-      res.json({ Hello: 'World' });
-    });
-    this.app.use('/', router);
-    this.app.use('/api/v1/users', userRouter);
+  private init() {
+    this.router
+      .get('/', (req: Request, res: Response, next: NextFunction) => {
+        res.json({ Hello: 'World' });
+      });
+    this.router.use('/api/v1/users', userRouter);
   }
 }
 
-export default BaseRouter;
+export default new BaseRouter().router;
