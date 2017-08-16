@@ -1,8 +1,8 @@
 # TypeScript-RESTful-API
 
-本教程详细介绍了如何使用NodeJS，ExpressJS和TypeScript开发RESTful API。
+本教程详细介绍了如何使用`NodeJS`，`ExpressJS`和`TypeScript`开发RESTful API。
 
-我们将使用tsconfig.json来配置项目，Gulp来处理自动化，d.ts用于管理npm的typings。
+我们将使用`tsconfig.json`来配置项目，`Gulp`来处理自动化，`d.ts`用于管理npm的typings。
 
 ## 开始工作
 
@@ -142,3 +142,9 @@ gulp.task('default', ['watch', 'assets']);
 现在测试，删除`dist/test.js`，然后在项目根目录运行`gulp`，此时可以看到编译器完美按照我们的配置进行了。
 
 ## 配置Express
+
+安装`Express`和`debug`
+
+``` bash
+$ npm install express debug --save
+```
