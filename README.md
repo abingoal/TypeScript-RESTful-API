@@ -139,7 +139,7 @@ gulp.task('assets', () => {
 gulp.task('default', ['watch', 'assets']);
 ```
 
-现在测试，删除`dist/test.js`，然后在项目根目录运行`gulp`，此时可以看到编译器完美按照我们的配置进行了。
+现在测试下，删除`dist/test.js`，然后在项目根目录运行`gulp`，此时就可以看到编译器完美按照我们的配置进行了。
 
 ## 配置Express
 
@@ -148,3 +148,171 @@ gulp.task('default', ['watch', 'assets']);
 ``` bash
 $ npm install express debug --save
 ```
+
+在`TypeScript`中如果你使用了第三方包，则还需要下载相应的包定义文件。该文件会告诉编译器你正在使用的模块的结。
+
+在`TypeScript 2.0`之前，处理`.d.ts`文件是一个很蛋疼的事情，`TypeScript`内置了`tsd`来处理，然后在文件中使用三斜杠添加引用。
+
+`Typings`是作为`tsd`的替代者而出现的，通过`typings.json`配置可以辅助IDE，给出有智能的提示信息，以及重构的依据。
+
+在`Typescript 2.0`之后，`TypeScript`将会默认的查看`./node_modules/@types`文件夹，自动从这里来获取模块的类型定义，当然了，你需要独立安装这个类型定义。
+
+安装`Node`，`Express`和`debug`的类型定义：
+
+``` bash
+$ npm install @types/node @types/express @types/debug --save-dev
+```
+
+我们已经准备好创建HTTP服务器了。将`src/test.ts`重命名为`src/bin/www.ts`，删除控制台日志，并添加以下内容：
+
+``` javascript
+import * as debug from 'debug';
+import * as http from 'http';
+
+import App from '../app';
+
+const debugging = debug('gameapi:server');
+
+const port = normalizePort(process.env.PORT || 3000);
+App.set('port', port);
+
+const server = http.createServer(App);
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * 标准化端口号
+ *
+ * @param {(number|string)} val 端口号
+ * @returns {(number|string|boolean)} 返回值
+ */
+function normalizePort(val: number|string): number|string|boolean {
+  const normalizeport: number = (typeof val === 'string') ? parseInt(val, 10) : val;
+  if (isNaN(normalizeport)) {
+    return val;
+  } else if (normalizeport >= 0) {
+    return normalizeport;
+  }else {
+    return false;
+  }
+}
+/**
+ * 错误处理
+ *
+ * @param {NodeJS.ErrnoException} error 抛出异常
+ */
+function onError(error: NodeJS.ErrnoException): void {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+  const bind = (typeof port === 'string') ? 'Pipe ' + port : 'Port ' + port;
+  switch (error.code) {
+    case 'EACCES':
+      console.error(`${bind} 需要提升权限`);
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(`${bind} 已经在使用中`);
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * 监听端口
+ *
+ */
+function onListening(): void {
+  const addr = server.address();
+  const bind = (typeof addr === 'string') ? `pipe ${addr}` : `port ${addr.port}`;
+  debugging(`Listening on ${bind}`);
+}
+
+```
+
+如果你使用了带有代码检查之类的IDE(vs或vsc之类的)，会报出一个找不到App模块的错误，现在先不用管它。先看下刚才创建的文件内容：
+
+1. 使用`debug`模块以在终端中打印调试日志。
+2. 从环境变量中获取端口号，或者自己设置为3000。
+3. 创建Http服务器，然后将app传给它。
+4. 设置一些基本的错误处理和程序监听处理。
+
+由于我们要从此文件来启动应用程序，因此可以在`package.json`中添加一个`start`的脚本来作为启动项。
+
+``` javascript
+"scripts": {
+  "start": "node dist/bin/www"
+},
+```
+程序入口写好了，然后我们就可以创建app.ts了。
+
+``` bash
+$ touch src/app.ts
+$ npm install express body-parser morgan --save
+$ npm install @types/body-parser @types/morgan --save-dev
+```
+
+在`app.ts`里面，我们创建一个App类来配置我们的Express服务器，最后把express实例导出。
+
+``` javascript
+import * as bodyParser from 'body-parser';
+import * as debug from 'debug';
+import * as express from 'express';
+import * as logger from 'morgan';
+import * as path from 'path';
+import baseRouter from './routes/baserouter';
+
+const debugging = debug('gameapi:apps');
+/**
+ * 创建并配置ExpressJS Web服务器
+ * @class App
+ */
+class App {
+
+  // 引用Express实例
+  public app: express.Application;
+  // 在Express实例上运行配置方法
+  constructor() {
+    this.app = express();
+    this.middleware();
+  }
+
+  // 配置Express中间件
+  private middleware(): void {
+    this.app.use(logger('dev'));
+    this.app.use(bodyParser.json());
+    this.app.use(bodyParser.urlencoded({ extended: false }));
+    this.app.use(express.static(path.join(__dirname, 'public')));
+    this.app.use(baseRouter);
+  }
+}
+
+export default new App().app;
+
+```
+
+这里我把路由中间件分离出去了，这样可以是代码结构更清晰，也方便之后的扩展。
+
+好了，现在我们可以检测下我们的代码能不能正常运行了。
+
+编译代码:
+
+``` bash
+$ gulp scripts
+$ npm start
+```
+
+然后在浏览器中输入:
+
+```
+http://127.0.0.1:3000
+```
+
+## 代码测试
+
+代码都已上传
+教程未完待续...
+
