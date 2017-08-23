@@ -43,7 +43,7 @@ describe('GET api/v1/users/:id', () => {
       });
   });
 
-  it('should return abing', async () => {
+  it('should return abing', () => {
     return chai.request(app).get('/api/v1/users/1')
       .then((res) => {
         expect(res.body.hero.name).to.equal('abing');
