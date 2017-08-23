@@ -10,7 +10,7 @@ class BaseRouter {
   private init() {
     this.router
       .get('/', (req: Request, res: Response, next: NextFunction) => {
-        res.json({ Hello: 'World' });
+        res.json({ message: 'Hello World' });
       });
     this.router.use('/api/v1/users', userRouter);
   }

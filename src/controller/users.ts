@@ -12,7 +12,7 @@ class Users {
    * @param {NextFunction} next 下一步
    * @memberof Users
    */
-  public userInfo(req: Request, res: Response, next: NextFunction) {
+  public static userInfo(req: Request, res: Response, next: NextFunction) {
     const userid = parseInt(req.params.userid, 10);
     dbUser.userInfo(userid).then((result) => {
       res.json(result);
@@ -21,4 +21,4 @@ class Users {
     });
   }
 }
-export default new Users();
+export default Users;

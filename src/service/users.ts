@@ -8,9 +8,9 @@ class Users {
      * 根据ID获取用户信息
      * @param userid 用户id
      */
-    public async userInfo(userid: number) {
+    public static async userInfo(userid: number) {
         const type = 1;
         return await db.execProc('call p_API_UserInfo(:userid,:type)', { userid, type });
     }
 }
-export default new Users();
+export default Users;
