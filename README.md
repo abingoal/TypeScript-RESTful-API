@@ -295,6 +295,7 @@ export default new App().app;
 ```
 
 这里我把路由中间件分离出去了，这样可以是代码结构更清晰，也方便之后的扩展。
+(关于[路由](http://expressjs.com/en/starter/basic-routing.html)和[中间件](http://expressjs.com/en/guide/using-middleware.html)的详细信息可以参考express的[官方文档](http://expressjs.com/)。)
 
 好了，现在我们可以检测下我们的代码能不能正常运行了。
 
@@ -313,6 +314,169 @@ http://127.0.0.1:3000
 
 ## 代码测试
 
-代码都已上传
-教程未完待续...
+作为一个优秀的开发者，代码中的测试时必不可少的。所以我们就需要使用TDD (test-driven development)来测试所编写的代码。
+
+本例中使用Mocha和Chai创建测试。
+
+首先我们先安装测试包依赖：
+
+``` bash
+$ npm install mocha chai chai-http --save-dev
+$ npm install @types/mocha @types/chai @types/chai-http --save-dev
+```
+
+由于`mocha`只能理解JavaScript代码，因此我们所写的ts代码会不被mocha认可，需要其他方式来实现这个功能。
+
+本例子中我们就是用`ts-node`来转换代码提供给mocha进行测试。
+
+首先依然是安装依赖:
+
+``` bash
+$ npm install ts-node --save-dev
+```
+
+然后在`package.json`中添加`test`脚本,使用`ts-node`来运行mocha。
+
+``` bash
+"scripts": {
+  "start": "node dist/bin/www",
+  "test": "mocha --reporter spec --compilers ts:ts-node/register 'test/**/*.test.ts'"
+},
+```
+
+所有环境设置好之后，我们就可以在 `baserouter` 中添加路由了。
+
+``` javascript
+import { NextFunction, Request, Response, Router } from 'express';
+import app from '../app';
+import userRouter from '../routes/userrouter';
+
+class BaseRouter {
+  public router: Router = Router();
+  constructor() {
+    this.init();
+  }
+  private init() {
+    this.router
+      .get('/', (req: Request, res: Response, next: NextFunction) => {
+        res.json({ message: 'Hello World' });
+      });
+    this.router.use('/api/v1/users', userRouter);
+  }
+}
+
+export default new BaseRouter().router;
+
+```
+这里我们写一个简单的路由，访问首页的时候返回一个JSON对象`{ message: 'Hello World' }`。
+
+然后在根目录创建一个`test`文件夹,并添加一个文件，命名为`hello.test.ts`。(这里注意你的命名方式，需要和`package.json`中配置的测试脚本命名匹配)
+
+``` javascript
+import * as chai from 'chai';
+import chaiHttp = require('chai-http');
+import * as mocha from 'mocha';
+
+import app from '../src/App';
+
+chai.use(chaiHttp);
+const expect = chai.expect;
+
+describe('baseRoute', () => {
+
+  it('should be json', () => {
+    return chai.request(app).get('/')
+    .then((res) => {
+      expect(res.type).to.eql('application/json');
+    });
+  });
+
+  it('should have a message prop', () => {
+    return chai.request(app).get('/')
+    .then((res) => {
+      expect(res.body.message).to.eql('Hello World!');
+    });
+  });
+
+});
+
+```
+
+然后在命令行中输入`npm test`, 这是应该能看到`baseRoute`的代码测试描述，并且都通过了检测。
+(当然在此之前你可能会遇到错误，因为我在例子中使用了数据库连接，因此需要配置下数据库才能访问，不过你也可以先删掉数据库的连接，只去测试正常情况下的代码)
+
+同样的，我们也可以创建其他路由来检测，例如我在路由文件夹下新建了`userrouter.ts`，该路由中有一个路由器，通过`userid`来获取用户信息，并返回 id 和 name 字段。
+
+这样我们可以新建一个`user.test.ts`来测试我们的用户API接口。
+
+``` javascript
+import * as chai from 'chai';
+import chaiHttp = require('chai-http');
+import * as mocha from 'mocha';
+
+import app from '../src/App';
+
+chai.use(chaiHttp);
+const expect = chai.expect;
+
+describe('GET api/v1/users', () => {
+
+  it('responds with JSON array', () => {
+    return chai.request(app).get('/api/v1/users')
+      .then((res) => {
+        expect(res.status).to.equal(200);
+        expect(res).to.be.json;
+        expect(res.body).to.be.an('array');
+        expect(res.body).to.have.length(5);
+      });
+  });
+
+  it('should include abing', () => {
+    return chai.request(app).get('/api/v1/users')
+      .then((res) => {
+        const abing = res.body.find((user) => user.name === 'abing');
+        expect(abing).to.exist;
+        expect(abing).to.have.all.keys([
+          'id',
+          'name'
+        ]);
+      });
+  });
+
+});
+describe('GET api/v1/users/:id', () => {
+
+  it('responds with single JSON object', () => {
+    return chai.request(app).get('/api/v1/users/1')
+      .then((res) => {
+        expect(res.status).to.equal(200);
+        expect(res).to.be.json;
+        expect(res.body).to.be.an('object');
+      });
+  });
+
+  it('should return abing', () => {
+    return chai.request(app).get('/api/v1/users/1')
+      .then((res) => {
+        expect(res.body.hero.name).to.equal('abing');
+      });
+  });
+
+});
+
+```
+
+此时再运行 `npm test`，你可以看到命令行中的结果：
+
+``` bash
+baseRoute
+  ✓ should be json
+  ✓ should have a message prop
+
+GET api/v1/users
+  ✓ responds with JSON array
+  ✓ should include abing
+```
+
+`mocha`的详细文档可查看[https://mochajs.org/](https://mochajs.org/)
 
